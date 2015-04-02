@@ -59,15 +59,13 @@ function update(){
   if (opened){
     sock.send(id);
   }
-
-  setTimeout('update()', 200);
 };
 
 jQuery( function(){
   id = '<: $id :>';
   console.log('<: $id :>');
 
-  update();
+  setInterval('update()', 200);
 });
 -->
 </script>
