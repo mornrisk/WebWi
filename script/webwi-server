@@ -11,6 +11,15 @@ use WebWi::Web;
 use WebWi;
 use URI::Escape;
 use File::Path ();
+use Cache::Memcached::Fast;
+use SockJS;
+
+my $cache;
+
+BEGIN {
+    my $conf  = WebWi->config->{memcached} or die "Missing configuration about memcached";
+    $cache = Cache::Memcached::Fast->new($conf) or die "memcached stopped?";
+}
 
 my $app = builder {
     enable 'Plack::Middleware::Static',
@@ -21,8 +30,28 @@ my $app = builder {
         root => File::Spec->catdir(dirname(__FILE__), '..', 'static');
     enable 'Plack::Middleware::ReverseProxy';
 
-    WebWi::Web->to_app();
+    mount '/' => WebWi::Web->to_app();
+
+    mount '/wi' => SockJS->new(chunked => 0, handler => sub {
+        my ($session) = @_;
+        $session->on(
+            'data' => sub {
+                my ($session, $id) = @_;
+
+                #warn "\n****** $id ******\n";
+                my $wi = $cache->get($id);
+                if ($wi){
+                    $session->write($wi);
+                }else{
+                    $session->write({weight => 'unknown'});
+                }
+            }
+        );
+    });
+
+    #WebWi::Web->to_app();
 };
+
 unless (caller) {
     my $port        = 5000;
     my $host        = '127.0.0.1';

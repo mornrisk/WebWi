@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>WI</title>
+<meta charset="utf-8">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
+<style>
+<!--
+div#wi {
+  display: box;
+  width: 200px;
+  border: 1px solid #888;
+  box-shadow: inset 2px 2px 2px #eee;
+  background-color: #000;
+  color: #fff;
+  font-size: 200%;
+  text-align: right;
+  padding-right: 1em;
+}
+
+-->
+</style>
+</head>
+<body>
+<div id="wi">-----</div>
+<script type="text/javascript">
+<!--
+var id;
+var opened = 0;
+var sock = new SockJS('/wi');
+
+sock.onopen = function(){
+  opened = 1;
+};
+
+sock.onmessage = function(e){
+  var weight_info = e.data;
+  console.log(e);
+  console.log(e.data.weight);
+
+  if (weight_info.weight == 'unknown'){
+    jQuery('#wi').text('-----');
+    jQuery('#wi').css('color', '#fff');
+    return;
+  }
+
+  var weight = weight_info.weight;
+  weight = String(parseInt(weight)).replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+  jQuery('#wi').text(weight + ' kg');
+  if (weight_info.stable == 1){
+    jQuery('#wi').css('color', '#08f');
+  }else{
+    jQuery('#wi').css('color', '#f00');
+  }
+};
+
+function update(){
+  if (opened){
+    sock.send(id);
+  }
+
+  setTimeout('update()', 200);
+};
+
+jQuery( function(){
+  id = '<: $id :>';
+  console.log('<: $id :>');
+
+  update();
+});
+-->
+</script>
+</body>
+</html>

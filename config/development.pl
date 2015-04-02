@@ -9,4 +9,10 @@ my $dbpath = File::Spec->catfile($basedir, 'db', 'development.db');
             sqlite_unicode => 1,
         }
     ],
+    'memcached' => +{
+        servers => [
+            '127.0.0.1:11211',
+        ],
+        namespace => 'wi:',
+    },
 };

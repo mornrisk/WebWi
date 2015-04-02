@@ -4,6 +4,7 @@ use warnings;
 use utf8;
 our $VERSION='0.01';
 use 5.008001;
+use Cache::Memcached::Fast;
 use WebWi::DB::Schema;
 use WebWi::DB;
 
@@ -11,24 +12,33 @@ use parent qw/Amon2/;
 # Enable project local mode.
 __PACKAGE__->make_local_context();
 
-my $schema = WebWi::DB::Schema->instance;
-
-sub db {
+sub cache {
     my $c = shift;
-    if (!exists $c->{db}) {
-        my $conf = $c->config->{DBI}
-            or die "Missing configuration about DBI";
-        $c->{db} = WebWi::DB->new(
-            schema       => $schema,
-            connect_info => [@$conf],
-            # I suggest to enable following lines if you are using mysql.
-            # on_connect_do => [
-            #     'SET SESSION sql_mode=STRICT_TRANS_TABLES;',
-            # ],
-        );
+    if (!exists $c->{cache}) {
+        my $conf = $c->config->{memcached} or die "Missing configuration about memcached";
+        $c->{cache} = Cache::Memcached::Fast->new($conf);
     }
-    $c->{db};
+    $c->{cache};
 }
+
+#my $schema = WebWi::DB::Schema->instance;
+
+#sub db {
+#    my $c = shift;
+#    if (!exists $c->{db}) {
+#        my $conf = $c->config->{DBI}
+#            or die "Missing configuration about DBI";
+#        $c->{db} = WebWi::DB->new(
+#            schema       => $schema,
+#            connect_info => [@$conf],
+#            # I suggest to enable following lines if you are using mysql.
+#            # on_connect_do => [
+#            #     'SET SESSION sql_mode=STRICT_TRANS_TABLES;',
+#            # ],
+#        );
+#    }
+#    $c->{db};
+#}
 
 1;
 __END__
